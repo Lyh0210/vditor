@@ -113,6 +113,7 @@ const genUploadedLabel =
         });
     };
 
+// TODO wysiwyg
 const uploadFiles = (vditor: IVditor, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement) => {
     // FileList | DataTransferItemList | File[] => File[]
     const fileList = [];

@@ -47,6 +47,7 @@ export const html2md = async (vditor: IVditor, textHTML: string, textPlain?: str
                                 return;
                             }
                             const original = responseJSON.data.originalURL;
+                            // TODO wysiwyg
                             setSelectionByInlineText(original, vditor.editor.element.childNodes);
                             insertText(vditor, responseJSON.data.url, "", true);
                         } else {
