@@ -1,11 +1,11 @@
 import {getSelectPosition} from "../editor/getSelectPosition";
+import {insertText} from "../editor/insertText";
 import {setSelectionFocus} from "../editor/setSelection";
+import {uploadFiles} from "../upload";
 import {copyEvent, focusEvent, hotkeyEvent, scrollCenter, selectEvent} from "../util/editorCommenEvent";
 import {getText} from "../util/getText";
 import {getParentBlock} from "./getParentBlock";
 import {highlightToolbar} from "./highlightToolbar";
-import {uploadFiles} from "../upload";
-import {insertText} from "../editor/insertText";
 
 class WYSIWYG {
     public element: HTMLPreElement;
@@ -41,42 +41,26 @@ class WYSIWYG {
             this.element.addEventListener("drop", (event: CustomEvent & { dataTransfer?: DataTransfer }) => {
                 event.stopPropagation();
                 event.preventDefault();
-
                 const files = event.dataTransfer.items;
-                if (files.length === 0) {
-                    return;
+                if (files.length > 0) {
+                    uploadFiles(vditor, files);
                 }
-
-                uploadFiles(vditor, files);
             });
         }
 
         this.element.addEventListener("paste", async (event: ClipboardEvent) => {
-            const textHTML = event.clipboardData.getData("text/html");
-            const textPlain = event.clipboardData.getData("text/plain");
             event.stopPropagation();
             event.preventDefault();
+            const textHTML = event.clipboardData.getData("text/html");
+            const textPlain = event.clipboardData.getData("text/plain");
             if (textHTML.trim() !== "") {
-                if (textHTML.length < 106496) {
-                    if (textHTML.replace(/<(|\/)(html|body|meta)[^>]*?>/ig, "").trim() ===
-                        `<a href="${textPlain}">${textPlain}</a>` ||
-                        textHTML.replace(/<(|\/)(html|body|meta)[^>]*?>/ig, "").trim() ===
-                        `<!--StartFragment--><a href="${textPlain}">${textPlain}</a><!--EndFragment-->`) {
-                    } else {
-                        // TODO 需要 lute 提供一个将拷贝的 HTML 转换为 vditor wysiwyg 的 HTML 的方法
-                        document.execCommand('insertHTML', false, textHTML)
-                        return;
-                    }
-                }
-            } else if (textPlain.trim() !== "" && event.clipboardData.files.length === 0) {
-            } else if (event.clipboardData.files.length > 0) {
-                if (!(vditor.options.upload.url || vditor.options.upload.handler)) {
-                    return;
-                }
+                // TODO 需要 lute 提供一个将拷贝的 HTML 转换为 vditor wysiwyg 的 HTML 的方法
+                document.execCommand("insertHTML", false, textHTML);
+            } else if (event.clipboardData.files.length > 0 && vditor.options.upload.url) {
                 uploadFiles(vditor, event.clipboardData.files);
-                return;
+            } else if (textPlain.trim() !== "" && event.clipboardData.files.length === 0) {
+                document.execCommand("insertText", false, textPlain);
             }
-            document.execCommand('insertText', false, textPlain)
         });
 
         this.element.addEventListener("input", (event: IHTMLInputEvent) => {
