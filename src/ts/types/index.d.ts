@@ -247,7 +247,8 @@ interface IVditor {
     };
     upload?: {
         element: HTMLElement
-        isUploading: boolean,
+        isUploading: boolean
+        range: Range
     };
     undo: {
         redo(vditor: IVditor): void

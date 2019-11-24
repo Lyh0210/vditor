@@ -37,9 +37,9 @@
 * [148](https://github.com/b3log/vditor/issues/148) 添加支持思维导图的功能 `feature`
 * [161](https://github.com/b3log/vditor/issues/161) 在工具栏上添加语音转文字功能 `feature`
 
+### v1.10.3 / 2019-11-24
 
-### v1.10.2 / 2019-11-21
-
+* [172](https://github.com/b3log/vditor/issues/172) 上传改进  `enhancement`
 * [171](https://github.com/b3log/vditor/issues/171) 编辑器在生成 preview 之前，添加处理函数  `feature`
 * [170](https://github.com/b3log/vditor/issues/170) 新增内联数学公式开关 `enhancement`
 * [168](https://github.com/b3log/vditor/issues/168) highlightRender报错 `invalid`
