@@ -72,68 +72,68 @@ const validateFile = (vditor: IVditor, files: File[]) => {
 };
 
 const genUploadedLabel = (responseText: string, vditor: IVditor) => {
-    let editorElement = vditor.currentMode === 'markdown' ? vditor.editor.element : vditor.wysiwyg.element
+    const editorElement = vditor.currentMode === "markdown" ? vditor.editor.element : vditor.wysiwyg.element;
     editorElement.focus();
     const response = JSON.parse(responseText);
-    let errorTip: string = ''
+    let errorTip: string = "";
 
     if (response.code === 1) {
-        errorTip = `${response.msg}`
+        errorTip = `${response.msg}`;
     }
 
     if (response.data.errFiles && response.data.errFiles.length > 0) {
-        errorTip = `<ul><li>${errorTip}</li>`
+        errorTip = `<ul><li>${errorTip}</li>`;
         response.data.errFiles.forEach((data: string) => {
             const lastIndex = data.lastIndexOf(".");
             const filename = vditor.options.upload.filename(data.substr(0, lastIndex)) + data.substr(lastIndex);
-            errorTip += `<li>${filename} ${i18n[vditor.options.lang].uploadError}</li>`
+            errorTip += `<li>${filename} ${i18n[vditor.options.lang].uploadError}</li>`;
         });
-        errorTip += '</ul>'
+        errorTip += "</ul>";
     }
 
     if (errorTip) {
         vditor.tip.show(errorTip);
     } else {
-        vditor.tip.hide()
+        vditor.tip.hide();
     }
 
-    let succFileText = ''
+    let succFileText = "";
     Object.keys(response.data.succMap).forEach((key) => {
         const path = response.data.succMap[key];
         const lastIndex = key.lastIndexOf(".");
-        let type = key.substr(lastIndex)
+        let type = key.substr(lastIndex);
         const filename = vditor.options.upload.filename(key.substr(0, lastIndex)) + type;
-        type = type.toLowerCase()
+        type = type.toLowerCase();
         if (type === ".wav" || type === ".mp3" || type === ".ogg") {
-            succFileText += `<audio controls="controls" src="${path}"></audio>\n`
+            succFileText += `<audio controls="controls" src="${path}"></audio>\n`;
         } else if (type === ".apng"
-            || type === '.bmp'
-            || type === '.gif'
+            || type === ".bmp"
+            || type === ".gif"
             || type === ".ico" || type === ".cur"
-            || type === '.jpg' || type === '.jpeg' || type === '.jfif' || type === '.pjp' || type === '.pjpeg'
-            || type === '.png'
+            || type === ".jpg" || type === ".jpeg" || type === ".jfif" || type === ".pjp" || type === ".pjpeg"
+            || type === ".png"
             || type === ".svg"
             || type === ".webp") {
-            if (vditor.currentMode === 'wysiwyg') {
-                succFileText += `<img title="${filename}" src="${path}">\n`
+            if (vditor.currentMode === "wysiwyg") {
+                succFileText += `<img title="${filename}" src="${path}">\n`;
             } else {
-                succFileText += `![${filename}](${path})\n`
+                succFileText += `![${filename}](${path})\n`;
             }
         } else {
-            if (vditor.currentMode === 'wysiwyg') {
-                succFileText += `<a href="${path}">${filename}</a>\n`
+            if (vditor.currentMode === "wysiwyg") {
+                succFileText += `<a href="${path}">${filename}</a>\n`;
             } else {
-                succFileText += `[${filename}](${path})\n`
+                succFileText += `[${filename}](${path})\n`;
             }
         }
     });
-    setSelectionFocus(vditor.upload.range)
-    if (vditor.currentMode === 'wysiwyg') {
-        document.execCommand('insertHTML', false, succFileText)
+    setSelectionFocus(vditor.upload.range);
+    if (vditor.currentMode === "wysiwyg") {
+        document.execCommand("insertHTML", false, succFileText);
     } else {
         insertText(vditor, succFileText, "", true);
     }
-    vditor.upload.range = getSelection().getRangeAt(0).cloneRange()
+    vditor.upload.range = getSelection().getRangeAt(0).cloneRange();
 };
 
 const uploadFiles = (vditor: IVditor, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement) => {
@@ -172,7 +172,7 @@ const uploadFiles = (vditor: IVditor, files: FileList | DataTransferItemList | F
         }
     }
 
-    vditor.upload.range = getSelection().getRangeAt(0)
+    vditor.upload.range = getSelection().getRangeAt(0);
 
     const validateResult = validateFile(vditor, fileList);
     if (validateResult.length === 0) {

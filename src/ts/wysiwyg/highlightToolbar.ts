@@ -271,10 +271,10 @@ export const highlightToolbar = (vditor: IVditor) => {
     }
 
     // audio popover
-    let audioElement:HTMLAudioElement
+    let audioElement: HTMLAudioElement;
     if (range.startContainer.nodeType === 3 && range.startContainer.previousSibling &&
-        range.startContainer.previousSibling.nodeName === 'AUDIO') {
-        audioElement =  range.startContainer.previousSibling as HTMLAudioElement
+        range.startContainer.previousSibling.nodeName === "AUDIO") {
+        audioElement =  range.startContainer.previousSibling as HTMLAudioElement;
         vditor.wysiwyg.popover.innerHTML = "";
 
         const updateAudio = () => {
