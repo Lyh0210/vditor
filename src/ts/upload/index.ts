@@ -115,13 +115,13 @@ const genUploadedLabel = (responseText: string, vditor: IVditor) => {
             || type === ".svg"
             || type === ".webp") {
             if (vditor.currentMode === "wysiwyg") {
-                succFileText += `<img title="${filename}" src="${path}">\n`;
+                succFileText += `<img title="${filename}" src="${path}">`;
             } else {
                 succFileText += `![${filename}](${path})\n`;
             }
         } else {
             if (vditor.currentMode === "wysiwyg") {
-                succFileText += `<a href="${path}">${filename}</a>\n`;
+                succFileText += `<a href="${path}">${filename}</a>`;
             } else {
                 succFileText += `[${filename}](${path})\n`;
             }

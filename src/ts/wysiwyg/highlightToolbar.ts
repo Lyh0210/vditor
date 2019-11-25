@@ -1,8 +1,13 @@
 import indentSVG from "../../assets/icons/indent.svg";
 import outdentSVG from "../../assets/icons/outdent.svg";
 import trashcanSVG from "../../assets/icons/trashcan.svg";
+import beforeSVG from "../../assets/icons/before.svg";
+import afterSVG from "../../assets/icons/after.svg";
+import previewSVG from "../../assets/icons/preview.svg";
+import editSVG from "../../assets/icons/edit.svg";
 import {i18n} from "../i18n";
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../util/hasClosest";
+import {setSelectionFocus} from "../editor/setSelection";
 
 export const highlightToolbar = (vditor: IVditor) => {
     if (getSelection().rangeCount === 0) {
@@ -106,38 +111,6 @@ export const highlightToolbar = (vditor: IVditor) => {
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", indent);
 
         setPopoverPosition(vditor, topUlElement);
-    }
-
-    // pre popover
-    const preElement = hasClosestByTag(typeElement, "PRE");
-    if (preElement) {
-        vditor.wysiwyg.popover.innerHTML = "";
-
-        const updateLanguage = () => {
-            preElement.firstElementChild.className = `language-${input.value}`;
-        };
-        const input = document.createElement("input");
-        input.className = "vditor-input";
-        input.setAttribute("placeholder", "language");
-        input.value =
-            preElement.firstElementChild.className.indexOf("language-") > -1 ?
-                preElement.firstElementChild.className.split("-")[1].split(" ")[0] : "";
-        input.onblur = updateLanguage;
-        input.onkeypress = (event) => {
-            if (event.key === "Enter") {
-                updateLanguage();
-            }
-        };
-        const close = document.createElement("span");
-        close.innerHTML = trashcanSVG;
-        close.className = "vditor-icon";
-        close.onclick = () => {
-            preElement.remove();
-            vditor.wysiwyg.popover.style.display = "none";
-        };
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
-        setPopoverPosition(vditor, preElement);
     }
 
     // table popover
@@ -270,33 +243,6 @@ export const highlightToolbar = (vditor: IVditor) => {
         setPopoverPosition(vditor, typeElement);
     }
 
-    // audio popover
-    let audioElement: HTMLAudioElement;
-    if (range.startContainer.nodeType === 3 && range.startContainer.previousSibling &&
-        range.startContainer.previousSibling.nodeName === "AUDIO") {
-        audioElement =  range.startContainer.previousSibling as HTMLAudioElement;
-        vditor.wysiwyg.popover.innerHTML = "";
-
-        const updateAudio = () => {
-            audioElement.setAttribute("src", input.value);
-        };
-
-        const input = document.createElement("input");
-        input.className = "vditor-input";
-        input.setAttribute("placeholder", i18n[vditor.options.lang].link);
-        input.value = audioElement.getAttribute("src") || "";
-        input.onblur = updateAudio;
-        input.onkeypress = (event) => {
-            if (event.key === "Enter") {
-                updateAudio();
-            }
-        };
-
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
-
-        setPopoverPosition(vditor, audioElement);
-    }
-
     // img popover
     let imgElement: HTMLImageElement;
     if (range.startContainer.nodeType !== 3 && range.startContainer.childNodes.length > range.startOffset
@@ -366,7 +312,99 @@ export const highlightToolbar = (vditor: IVditor) => {
         setPopoverPosition(vditor, imgElement);
     }
 
-    if (!imgElement && !topUlElement && !tableElement && !preElement && typeElement.nodeName !== "A" && !audioElement
+    // pre popover
+    let preElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
+    if (preElement && preElement.getAttribute('data-type') === "pre") {
+        vditor.wysiwyg.popover.innerHTML = "";
+
+        const updateLanguage = () => {
+            preElement.firstElementChild.className = `language-${input.value}`;
+            if (input.value === 'abc' || input.value === 'mermaid' || input.value === 'echarts') {
+                preview.style.display = 'block'
+            } else {
+                preview.style.display = 'none'
+            }
+        };
+
+        const insertBefore = genInsertBefore(range, preElement)
+        const insertAfter = genInsertAfter(range, preElement)
+        const close = genClose(vditor.wysiwyg.popover, preElement)
+
+        const input = document.createElement("input");
+        input.className = "vditor-input";
+        input.setAttribute("placeholder", "language");
+        input.value =
+            preElement.firstElementChild.className.indexOf("language-") > -1 ?
+                preElement.firstElementChild.className.split("-")[1].split(" ")[0] : "";
+        input.onblur = updateLanguage;
+        input.onkeypress = (event) => {
+            if (event.key === "Enter") {
+                updateLanguage();
+            }
+        };
+
+        const preview = document.createElement("span");
+        preview.innerHTML = previewSVG;
+        preview.className = "vditor-icon";
+        preview.onclick = () => {
+            // TODO
+        };
+        if (input.value === 'abc' || input.value === 'mermaid' || input.value === 'echarts') {
+            preview.style.display = 'block'
+        } else {
+            preview.style.display = 'none'
+        }
+
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertBefore);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertAfter);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", preview);
+        setPopoverPosition(vditor, preElement);
+    } else {
+        preElement = undefined
+    }
+
+    // html popover
+    let htmlElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
+    if (htmlElement && htmlElement.getAttribute('data-type') === "html") {
+        let previewPanel :HTMLElement = htmlElement.querySelector('.vditor-wysiwyg__preview')
+        if (!previewPanel) {
+            htmlElement.insertAdjacentHTML("beforeend", '<div class="vditor-wysiwyg__preview"></div>');
+            previewPanel = htmlElement.querySelector('.vditor-wysiwyg__preview')
+        }
+        const textarea = htmlElement.querySelector('textarea')
+        textarea.onchange = () => {
+            textarea.innerHTML = textarea.value
+        }
+
+        vditor.wysiwyg.popover.innerHTML = "";
+
+        const preview = document.createElement("span");
+        if (previewPanel.style.display === 'block') {
+            preview.innerHTML = editSVG;
+        } else {
+            preview.innerHTML = previewSVG;
+        }
+        preview.className = "vditor-icon";
+        preview.onclick = () => {
+            if (previewPanel.style.display === 'none') {
+                preview.innerHTML = editSVG
+                previewPanel.innerHTML = textarea.value
+                previewPanel.style.display = 'block'
+            } else {
+                preview.innerHTML = previewSVG
+                previewPanel.style.display = 'none'
+            }
+        };
+
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", preview);
+        setPopoverPosition(vditor, htmlElement);
+    } else {
+        htmlElement = undefined
+    }
+
+    if (!imgElement && !topUlElement && !tableElement && !preElement && typeElement.nodeName !== "A" && !htmlElement
         && !hasClosestByClassName(typeElement, "vditor-panel")) {
         vditor.wysiwyg.popover.style.display = "none";
     }
@@ -377,3 +415,47 @@ const setPopoverPosition = (vditor: IVditor, element: HTMLElement) => {
     vditor.wysiwyg.popover.style.left = element.offsetLeft + "px";
     vditor.wysiwyg.popover.style.display = "block";
 };
+
+
+const genInsertBefore = (range: Range, element: HTMLElement) => {
+    const insertBefore = document.createElement("span");
+    insertBefore.innerHTML = beforeSVG;
+    insertBefore.className = "vditor-icon";
+    insertBefore.onclick = () => {
+        range.setStartBefore(element)
+        setSelectionFocus(range);
+        const node = document.createElement("p");
+        node.innerHTML = '\n'
+        range.insertNode(node);
+        range.collapse(true);
+        setSelectionFocus(range);
+    };
+    return insertBefore
+}
+
+const genInsertAfter = (range: Range, element: HTMLElement) => {
+    const insertAfter = document.createElement("span");
+    insertAfter.innerHTML = afterSVG;
+    insertAfter.className = "vditor-icon";
+    insertAfter.onclick = () => {
+        range.setStartAfter(element)
+        setSelectionFocus(range);
+        const node = document.createElement("p");
+        node.innerHTML = '\n'
+        range.insertNode(node);
+        range.collapse(true);
+        setSelectionFocus(range);
+    };
+    return insertAfter
+}
+
+const genClose = (popover: HTMLElement, element: HTMLElement) => {
+    const close = document.createElement("span");
+    close.innerHTML = trashcanSVG;
+    close.className = "vditor-icon";
+    close.onclick = () => {
+        element.remove();
+        popover.style.display = "none";
+    };
+    return close
+}

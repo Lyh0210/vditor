@@ -20,5 +20,32 @@
     blockquote:empty::before {
       content: ' ';
     }
+
+    &__block {
+      position: relative;
+      pre {
+        margin-bottom: 1em !important;
+      }
+
+      textarea {
+        border: 0;
+        background-color: rgba($toolbarIconHover, .16);
+        border-radius: 3px;
+        resize: vertical;
+        min-height: 72px;
+        width: 100%;
+
+        &:focus {
+          outline: none;
+        }
+      }
+    }
+
+    &__preview {
+      background-color: $textareaFocusBg;
+      display: none;
+      position: absolute;
+      top: 0;
+    }
   }
 }

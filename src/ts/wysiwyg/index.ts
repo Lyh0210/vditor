@@ -6,6 +6,7 @@ import {copyEvent, focusEvent, hotkeyEvent, scrollCenter, selectEvent} from "../
 import {getText} from "../util/getText";
 import {getParentBlock} from "./getParentBlock";
 import {highlightToolbar} from "./highlightToolbar";
+import {hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 
 class WYSIWYG {
     public element: HTMLPreElement;
@@ -114,7 +115,13 @@ class WYSIWYG {
                 }
             }
 
+            let htmlElement = hasClosestByClassName(range.startContainer as HTMLElement, 'vditor-wysiwyg__block')
+            if (!htmlElement || htmlElement.getAttribute('data-type') !== 'html') {
+                htmlElement = undefined
+            }
+
             if (!startSpace && !endSpace
+                && !htmlElement
                 && event.inputType !== "formatItalic"
                 && event.inputType !== "formatBold"
                 && event.inputType !== "formatRemove"
@@ -179,6 +186,10 @@ class WYSIWYG {
         });
 
         this.element.addEventListener("click", (event: IHTMLInputEvent) => {
+            if (hasClosestByClassName(event.target, 'vditor-panel') || hasClosestByTag(event.target, 'svg')) {
+                return
+            }
+
             highlightToolbar(vditor);
             if (event.target.tagName === "INPUT") {
                 if (event.target.checked) {
