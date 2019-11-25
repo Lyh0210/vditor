@@ -50,6 +50,8 @@ interface ILute {
 
     Html2Md(html: string): string[];
 
+    HTML2VditorDOM(html: string): string[];
+
     VditorDOM2Md(html: string): string[];
 }
 

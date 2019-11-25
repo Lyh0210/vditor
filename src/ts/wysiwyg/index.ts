@@ -54,8 +54,8 @@ class WYSIWYG {
             const textHTML = event.clipboardData.getData("text/html");
             const textPlain = event.clipboardData.getData("text/plain");
             if (textHTML.trim() !== "") {
-                // TODO 需要 lute 提供一个将拷贝的 HTML 转换为 vditor wysiwyg 的 HTML 的方法
-                document.execCommand("insertHTML", false, textHTML);
+                const vditorHTML = vditor.lute.HTML2VditorDOM(textHTML)
+                document.execCommand("insertHTML", false, vditorHTML[0] || vditorHTML[1]);
             } else if (event.clipboardData.files.length > 0 && vditor.options.upload.url) {
                 uploadFiles(vditor, event.clipboardData.files);
             } else if (textPlain.trim() !== "" && event.clipboardData.files.length === 0) {
