@@ -270,6 +270,33 @@ export const highlightToolbar = (vditor: IVditor) => {
         setPopoverPosition(vditor, typeElement);
     }
 
+    // audio popover
+    let audioElement:HTMLAudioElement
+    if (range.startContainer.nodeType === 3 && range.startContainer.previousSibling &&
+        range.startContainer.previousSibling.nodeName === 'AUDIO') {
+        audioElement =  range.startContainer.previousSibling as HTMLAudioElement
+        vditor.wysiwyg.popover.innerHTML = "";
+
+        const updateAudio = () => {
+            audioElement.setAttribute("src", input.value);
+        };
+
+        const input = document.createElement("input");
+        input.className = "vditor-input";
+        input.setAttribute("placeholder", i18n[vditor.options.lang].link);
+        input.value = audioElement.getAttribute("src") || "";
+        input.onblur = updateAudio;
+        input.onkeypress = (event) => {
+            if (event.key === "Enter") {
+                updateAudio();
+            }
+        };
+
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
+
+        setPopoverPosition(vditor, audioElement);
+    }
+
     // img popover
     let imgElement: HTMLImageElement;
     if (range.startContainer.nodeType !== 3 && range.startContainer.childNodes.length > range.startOffset
@@ -339,7 +366,7 @@ export const highlightToolbar = (vditor: IVditor) => {
         setPopoverPosition(vditor, imgElement);
     }
 
-    if (!imgElement && !topUlElement && !tableElement && !preElement && typeElement.nodeName !== "A"
+    if (!imgElement && !topUlElement && !tableElement && !preElement && typeElement.nodeName !== "A" && !audioElement
         && !hasClosestByClassName(typeElement, "vditor-panel")) {
         vditor.wysiwyg.popover.style.display = "none";
     }
