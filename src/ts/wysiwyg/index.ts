@@ -4,9 +4,9 @@ import {setSelectionFocus} from "../editor/setSelection";
 import {uploadFiles} from "../upload";
 import {copyEvent, focusEvent, hotkeyEvent, scrollCenter, selectEvent} from "../util/editorCommenEvent";
 import {getText} from "../util/getText";
+import {hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 import {getParentBlock} from "./getParentBlock";
 import {highlightToolbar} from "./highlightToolbar";
-import {hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 
 class WYSIWYG {
     public element: HTMLPreElement;
@@ -55,7 +55,7 @@ class WYSIWYG {
             const textHTML = event.clipboardData.getData("text/html");
             const textPlain = event.clipboardData.getData("text/plain");
             if (textHTML.trim() !== "") {
-                const vditorHTML = vditor.lute.HTML2VditorDOM(textHTML)
+                const vditorHTML = vditor.lute.HTML2VditorDOM(textHTML);
                 document.execCommand("insertHTML", false, vditorHTML[0] || vditorHTML[1]);
             } else if (event.clipboardData.files.length > 0 && vditor.options.upload.url) {
                 uploadFiles(vditor, event.clipboardData.files);
@@ -115,9 +115,9 @@ class WYSIWYG {
                 }
             }
 
-            let htmlElement = hasClosestByClassName(range.startContainer as HTMLElement, 'vditor-wysiwyg__block')
-            if (!htmlElement || htmlElement.getAttribute('data-type') !== 'html') {
-                htmlElement = undefined
+            let htmlElement = hasClosestByClassName(range.startContainer as HTMLElement, "vditor-wysiwyg__block");
+            if (!htmlElement || htmlElement.getAttribute("data-type") !== "html") {
+                htmlElement = undefined;
             }
 
             if (!startSpace && !endSpace
@@ -186,8 +186,8 @@ class WYSIWYG {
         });
 
         this.element.addEventListener("click", (event: IHTMLInputEvent) => {
-            if (hasClosestByClassName(event.target, 'vditor-panel') || hasClosestByTag(event.target, 'svg')) {
-                return
+            if (hasClosestByClassName(event.target, "vditor-panel") || hasClosestByTag(event.target, "svg")) {
+                return;
             }
 
             highlightToolbar(vditor);
