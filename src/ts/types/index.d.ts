@@ -269,6 +269,11 @@ interface IVditor {
         addToUndoStack(vditor: IVditor): void
         recordFirstPosition(vditor: IVditor): void,
     };
+    wysiwygUndo: {
+        redo(vditor: IVditor): void
+        undo(vditor: IVditor): void
+        addToUndoStack(vditor: IVditor): void
+    };
     wysiwyg: {
         element: HTMLPreElement,
         popover: HTMLDivElement,
@@ -320,7 +325,7 @@ declare class IVditorConstructor {
 
     public getSelection(): string;
 
-    public setValue(text: string): void;
+    public setValue(markdown: string): void;
 
     public renderPreview(value?: string): void;
 

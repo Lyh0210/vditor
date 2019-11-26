@@ -3,11 +3,11 @@ import {insertText} from "../editor/insertText";
 import {setSelectionFocus} from "../editor/setSelection";
 import {uploadFiles} from "../upload";
 import {copyEvent, focusEvent, hotkeyEvent, scrollCenter, selectEvent} from "../util/editorCommenEvent";
-import {getText} from "../util/getText";
 import {hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 import {afterRenderEvent} from "./afterRenderEvent";
 import {getParentBlock} from "./getParentBlock";
 import {highlightToolbar} from "./highlightToolbar";
+import {setRangeByWbr} from "./setRangeByWbr";
 
 class WYSIWYG {
     public element: HTMLPreElement;
@@ -24,6 +24,7 @@ class WYSIWYG {
         const popover = document.createElement("div");
         popover.className = "vditor-panel vditor-panel--none";
         popover.setAttribute("contenteditable", "false");
+        popover.setAttribute("data-render", "false");
         this.popover = popover;
         this.element.insertAdjacentElement("beforeend", popover);
 
@@ -77,8 +78,6 @@ class WYSIWYG {
                 return;
             }
 
-            afterRenderEvent(vditor);
-
             // 前后空格处理
             const blockElement = getParentBlock(range.startContainer as HTMLElement);
             const startOffset = getSelectPosition(blockElement, range).start;
@@ -129,43 +128,20 @@ class WYSIWYG {
                 range.insertNode(wbrNode);
 
                 // markdown 纠正
-                console.log(`RenderVditorDOM-argument:[${this.element.innerHTML.replace(/&gt;/g, ">")}]`);
-                this.element.innerHTML = vditor.lute.SpinVditorDOM(this.element.innerHTML.replace(/&gt;/g, ">"));
-                console.log(`RenderVditorDOM-result:[${this.element.innerHTML}]`);
+                console.log(`SpinVditorDOM-argument:[${this.element.innerHTML}]`);
+                this.element.innerHTML = vditor.lute.SpinVditorDOM(this.element.innerHTML);
+                console.log(`SpinVditorDOM-result:[${this.element.innerHTML}]`);
                 this.element.insertAdjacentElement("beforeend", this.popover);
 
                 // 设置光标
-                const wbrElement = this.element.querySelector("wbr");
-                if (!wbrElement.previousElementSibling) {
-                    if (wbrElement.previousSibling) {
-                        // text<wbr>
-                        range.setStart(wbrElement.previousSibling, wbrElement.previousSibling.textContent.length);
-                    } else {
-                        // 内容为空
-                        range.setStartBefore(wbrElement);
-                    }
-                } else {
-                    if (wbrElement.previousElementSibling.isEqualNode(wbrElement.previousSibling)) {
-                        if (wbrElement.previousElementSibling.lastChild) {
-                            // <em>text</em><wbr>
-                            range.setStart(wbrElement.previousElementSibling.lastChild,
-                                wbrElement.previousElementSibling.lastChild.textContent.length);
-                        } else {
-                            // <br><wbr>
-                            range.setStartAfter(wbrElement.previousElementSibling);
-                        }
-
-                    } else {
-                        // <em>text</em>text<wbr>
-                        range.setStart(wbrElement.previousSibling, wbrElement.previousSibling.textContent.length);
-                    }
-                }
-                setSelectionFocus(range);
+                setRangeByWbr(this.element, range)
 
                 if (vditor.hint) {
                     vditor.hint.render(vditor);
                 }
             }
+
+            afterRenderEvent(vditor);
         });
 
         this.element.addEventListener("click", (event: IHTMLInputEvent) => {
@@ -188,15 +164,13 @@ class WYSIWYG {
         });
 
         this.element.addEventListener("keypress", (event: KeyboardEvent) => {
-            if (!event.metaKey && !event.ctrlKey && event.key === "Enter" && event.shiftKey) {
+            if (event.key !== "Enter") {
+                return
+            }
+            if (!event.metaKey && !event.ctrlKey && event.shiftKey) {
                 // 软换行
                 const range = getSelection().getRangeAt(0).cloneRange();
-                let br = "\n";
-                if (range.startContainer.textContent.length === range.startOffset) {
-                    // 代码片段末尾换行
-                    br = "\n\n";
-                }
-                range.insertNode(document.createTextNode(br));
+                range.insertNode(document.createTextNode("\n"));
                 range.collapse(false);
                 setSelectionFocus(range);
 

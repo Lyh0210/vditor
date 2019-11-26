@@ -17,9 +17,5 @@ export const afterRenderEvent = (vditor: IVditor) => {
         vditor.devtools.renderEchart(vditor);
     }
 
-    // TODO
-    // if (addUndo) {
-    //     vditor.undo.addToUndoStack(vditor);
-    // }
-
+    vditor.wysiwygUndo.addToUndoStack(vditor);
 };

@@ -244,17 +244,23 @@ export const hotkeyEvent = (vditor: IVditor, editorElement: HTMLElement) => {
             });
         });
 
-        // TODO: WYSIWYG
         // undo
         if (!vditor.toolbar.elements.undo && (event.metaKey || event.ctrlKey) && event.key === "z") {
-            vditor.undo.undo(vditor);
+            if (vditor.currentMode === "markdown") {
+                vditor.undo.undo(vditor);
+            } else {
+                vditor.wysiwygUndo.undo(vditor);
+            }
             event.preventDefault();
         }
 
-        // TODO: WYSIWYG
         // redo
         if (!vditor.toolbar.elements.redo && (event.metaKey || event.ctrlKey) && event.key === "y") {
-            vditor.undo.redo(vditor);
+            if (vditor.currentMode === "markdown") {
+                vditor.undo.redo(vditor);
+            } else {
+                vditor.wysiwygUndo.redo(vditor);
+            }
             event.preventDefault();
         }
 

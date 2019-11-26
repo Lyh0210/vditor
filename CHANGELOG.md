@@ -39,6 +39,7 @@
 * 文档更新 
    * public static mermaidRender(element: HTMLElement, className?: string)
    * hotkey 和 setSelection 方法不支持 wysiwyg
+   * setValue 参数改为 markdown
 
 ### v1.10.3 / 2019-11-24
 

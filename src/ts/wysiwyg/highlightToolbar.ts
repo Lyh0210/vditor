@@ -451,6 +451,7 @@ const genPreview = (clickEvent: () => void, element: HTMLElement) => {
         element.insertAdjacentHTML("beforeend", '<div class="vditor-wysiwyg__preview"></div>');
         previewPanel = element.querySelector(".vditor-wysiwyg__preview");
         previewPanel.setAttribute("contenteditable", "false");
+        previewPanel.setAttribute("data-render", "false");
     }
     const preview = document.createElement("span");
     preview.innerHTML = previewSVG;

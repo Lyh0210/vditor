@@ -32,6 +32,7 @@ import {Options} from "./ts/util/Options";
 import {setPreviewMode} from "./ts/util/setPreviewMode";
 import {WYSIWYG} from "./ts/wysiwyg";
 import {renderDomByMd} from "./ts/wysiwyg/renderDomByMd";
+import {WysiwygUndo} from "./ts/undo/WysiwygUndo";
 
 class Vditor {
 
@@ -69,6 +70,7 @@ class Vditor {
             originalInnerHTML: document.getElementById(id).innerHTML,
             tip: new Tip(),
             undo: undefined,
+            wysiwygUndo: undefined,
             wysiwyg: undefined,
         };
 
@@ -79,9 +81,10 @@ class Vditor {
 
         if (mergedOptions.mode !== "wysiwyg-only") {
             this.vditor.editor = new Editor(this.vditor);
+            this.vditor.undo = new Undo();
         }
 
-        this.vditor.undo = new Undo();
+
 
         if (mergedOptions.resize.enable) {
             const resize = new Resize(this.vditor);
@@ -110,6 +113,7 @@ class Vditor {
 
             if (this.vditor.options.mode !== "markdown-only") {
                 this.vditor.wysiwyg = new WYSIWYG(this.vditor);
+                this.vditor.wysiwygUndo = new WysiwygUndo();
             }
 
             if (this.vditor.options.hint.at || this.vditor.toolbar.elements.emoji) {
@@ -261,16 +265,16 @@ class Vditor {
         }
     }
 
-    public setValue(value: string) {
+    public setValue(markdown: string) {
         if (this.vditor.currentMode === "markdown") {
-            formatRender(this.vditor, value, {
-                end: value.length,
-                start: value.length,
+            formatRender(this.vditor, markdown, {
+                end: markdown.length,
+                start: markdown.length,
             });
         } else {
-            renderDomByMd(this.vditor, value);
+            renderDomByMd(this.vditor, markdown);
         }
-        if (!value) {
+        if (!markdown) {
             localStorage.removeItem("vditor" + this.vditor.id);
         }
     }

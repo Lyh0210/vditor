@@ -106,7 +106,7 @@ export class Ui {
         }
 
         if (vditor.options.mode.indexOf("markdown") > -1) {
-            formatRender(vditor, initValue, undefined, true);
+            formatRender(vditor, initValue, undefined);
         }
     }
 }

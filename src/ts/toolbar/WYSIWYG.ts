@@ -45,7 +45,7 @@ export class WYSIWYG extends MenuItem {
                 }
                 const wysiwygMD = getText(vditor);
                 vditor.currentMode = "markdown";
-                formatRender(vditor, wysiwygMD, undefined, false);
+                formatRender(vditor, wysiwygMD, undefined);
                 vditor.editor.element.focus();
 
                 ["headings", "bold", "italic", "strike", "list", "ordered-list", "link", "inline-code"]
