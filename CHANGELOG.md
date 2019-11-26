@@ -36,7 +36,9 @@
 * [146](https://github.com/b3log/vditor/issues/146) 编辑预览同步滚动改进 `enhancement`
 * [148](https://github.com/b3log/vditor/issues/148) 添加支持思维导图的功能 `feature`
 * [161](https://github.com/b3log/vditor/issues/161) 在工具栏上添加语音转文字功能 `feature`
-* 文档更新 public static mermaidRender(element: HTMLElement, className?: string)
+* 文档更新 
+   * public static mermaidRender(element: HTMLElement, className?: string)
+   * hotkey 和 setSelection 方法不支持 wysiwyg
 
 ### v1.10.3 / 2019-11-24
 

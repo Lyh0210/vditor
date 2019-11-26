@@ -112,11 +112,18 @@ export const hotkeyEvent = (vditor: IVditor, editorElement: HTMLElement) => {
             return;
         }
 
-        // TODO: WYSIWYG
         // tab
         if (vditor.options.tab && event.key === "Tab") {
             event.preventDefault();
             event.stopPropagation();
+            if (vditor.currentMode === "wysiwyg") {
+                if (event.shiftKey) {
+                    document.execCommand("outdent", false);
+                } else {
+                    document.execCommand("indent", false);
+                }
+                return;
+            }
 
             const position = getSelectPosition(editorElement);
             const text = getText(vditor);
@@ -186,9 +193,8 @@ export const hotkeyEvent = (vditor: IVditor, editorElement: HTMLElement) => {
             return;
         }
 
-        // TODO: WYSIWYG
         // hotkey command + delete
-        if (vditor.options.keymap.deleteLine) {
+        if (vditor.options.keymap.deleteLine && vditor.currentMode === "markdown") {
             processKeymap(vditor.options.keymap.deleteLine, event, () => {
                 const position = getSelectPosition(editorElement);
                 const text = getText(vditor);
@@ -202,9 +208,8 @@ export const hotkeyEvent = (vditor: IVditor, editorElement: HTMLElement) => {
             });
         }
 
-        // TODO: WYSIWYG
         // hotkey command + d
-        if (vditor.options.keymap.duplicate) {
+        if (vditor.options.keymap.duplicate && vditor.currentMode === "markdown") {
             processKeymap(vditor.options.keymap.duplicate, event, () => {
                 const position = getSelectPosition(editorElement);
                 const text = getText(vditor);
