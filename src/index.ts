@@ -31,7 +31,6 @@ import {getText} from "./ts/util/getText";
 import {Options} from "./ts/util/Options";
 import {setPreviewMode} from "./ts/util/setPreviewMode";
 import {WYSIWYG} from "./ts/wysiwyg";
-import {setExpand} from "./ts/wysiwyg/setExpand";
 
 class Vditor {
 
@@ -134,7 +133,6 @@ class Vditor {
             this.vditor.editor.element.focus();
         } else {
             this.vditor.wysiwyg.element.focus();
-            setExpand(this.vditor.wysiwyg.element);
         }
     }
 
@@ -147,18 +145,28 @@ class Vditor {
     }
 
     public disabled() {
-        this.vditor.editor.element.setAttribute("contenteditable", "false");
+        if (this.vditor.currentMode === "markdown") {
+            this.vditor.editor.element.setAttribute("contenteditable", "false");
+        } else {
+            this.vditor.wysiwyg.element.setAttribute("contenteditable", "false");
+        }
     }
 
     public enable() {
-        this.vditor.editor.element.setAttribute("contenteditable", "true");
+        if (this.vditor.currentMode === "markdown") {
+            this.vditor.editor.element.setAttribute("contenteditable", "true");
+        }else {
+            this.vditor.wysiwyg.element.setAttribute("contenteditable", "true");
+        }
     }
 
     public setSelection(start: number, end: number) {
+        // TODO
         setSelectionByPosition(start, end, this.vditor.editor.element);
     }
 
     public getSelection() {
+        // TODO
         let selectText = "";
         if (window.getSelection().rangeCount !== 0) {
             selectText = getSelectText(this.vditor.editor.element);
@@ -167,7 +175,9 @@ class Vditor {
     }
 
     public renderPreview(value?: string) {
-        this.vditor.preview.render(this.vditor, value);
+        if (this.vditor.currentMode === "markdown") {
+            this.vditor.preview.render(this.vditor, value);
+        }
     }
 
     public getCursorPosition() {
@@ -199,7 +209,11 @@ class Vditor {
     }
 
     public getHTML() {
-        return md2htmlByVditor(getText(this.vditor), this.vditor);
+        if (this.vditor.currentMode === 'markdown') {
+            return md2htmlByVditor(getText(this.vditor), this.vditor);
+        } else {
+            return this.vditor.lute.VditorDOM2HTML(this.vditor.wysiwyg.element.innerHTML)
+        }
     }
 
     public tip(text: string, time?: number) {
@@ -211,6 +225,7 @@ class Vditor {
     }
 
     public deleteValue() {
+        // TODO
         if (window.getSelection().isCollapsed) {
             return;
         }
@@ -218,14 +233,17 @@ class Vditor {
     }
 
     public updateValue(value: string) {
+        // TODO
         insertText(this.vditor, value, "", true);
     }
 
     public insertValue(value: string) {
+        // TODO
         insertText(this.vditor, value, "");
     }
 
     public setValue(value: string) {
+        // TODO
         formatRender(this.vditor, value, {
             end: value.length,
             start: value.length,

@@ -55,8 +55,7 @@ class WYSIWYG {
             const textHTML = event.clipboardData.getData("text/html");
             const textPlain = event.clipboardData.getData("text/plain");
             if (textHTML.trim() !== "") {
-                const vditorHTML = vditor.lute.HTML2VditorDOM(textHTML);
-                document.execCommand("insertHTML", false, vditorHTML[0] || vditorHTML[1]);
+                document.execCommand("insertHTML", false, vditor.lute.HTML2VditorDOM(textHTML));
             } else if (event.clipboardData.files.length > 0 && vditor.options.upload.url) {
                 uploadFiles(vditor, event.clipboardData.files);
             } else if (textPlain.trim() !== "" && event.clipboardData.files.length === 0) {
@@ -141,10 +140,8 @@ class WYSIWYG {
 
                 // markdown 纠正
                 console.log(`RenderVditorDOM-argument:[${this.element.innerHTML.replace(/&gt;/g, ">")}]`);
-                const formatHTMLTemp = vditor.lute.RenderVditorDOM(this.element.innerHTML.replace(/&gt;/g, ">"));
-                const formatHTML = formatHTMLTemp[0] || formatHTMLTemp[1];
-                console.log(`RenderVditorDOM-result:[${formatHTML}]`);
-                this.element.innerHTML = formatHTML;
+                this.element.innerHTML = vditor.lute.SpinVditorDOM(this.element.innerHTML.replace(/&gt;/g, ">"));
+                console.log(`RenderVditorDOM-result:[${this.element.innerHTML}]`);
                 this.element.insertAdjacentElement("beforeend", this.popover);
 
                 // 设置光标

@@ -8,6 +8,11 @@ import trashcanSVG from "../../assets/icons/trashcan.svg";
 import {setSelectionFocus} from "../editor/setSelection";
 import {i18n} from "../i18n";
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../util/hasClosest";
+import {highlightRender} from "../markdown/highlightRender";
+import {codeRender} from "../markdown/codeRender";
+import {abcRender} from "../markdown/abcRender";
+import {chartRender} from "../markdown/chartRender";
+import {mermaidRender} from "../markdown/mermaidRender";
 
 export const highlightToolbar = (vditor: IVditor) => {
     if (getSelection().rangeCount === 0) {
@@ -316,14 +321,10 @@ export const highlightToolbar = (vditor: IVditor) => {
     let preElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
     if (preElement && preElement.getAttribute("data-type") === "pre") {
         vditor.wysiwyg.popover.innerHTML = "";
+        let codeElement = preElement.firstElementChild.firstElementChild
 
         const updateLanguage = () => {
-            preElement.firstElementChild.className = `language-${input.value}`;
-            if (input.value === "abc" || input.value === "mermaid" || input.value === "echarts") {
-                preview.style.display = "block";
-            } else {
-                preview.style.display = "none";
-            }
+            codeElement.className = `language-${input.value}`;
         };
 
         const insertBefore = genInsertBefore(range, preElement);
@@ -333,9 +334,8 @@ export const highlightToolbar = (vditor: IVditor) => {
         const input = document.createElement("input");
         input.className = "vditor-input";
         input.setAttribute("placeholder", "language");
-        input.value =
-            preElement.firstElementChild.className.indexOf("language-") > -1 ?
-                preElement.firstElementChild.className.split("-")[1].split(" ")[0] : "";
+        input.value = codeElement.className.indexOf("language-") > -1 ?
+                codeElement.className.split("-")[1].split(" ")[0] : "";
         input.onblur = updateLanguage;
         input.onkeypress = (event) => {
             if (event.key === "Enter") {
@@ -343,23 +343,26 @@ export const highlightToolbar = (vditor: IVditor) => {
             }
         };
 
-        const preview = document.createElement("span");
-        preview.innerHTML = previewSVG;
-        preview.className = "vditor-icon";
-        preview.onclick = () => {
-            // TODO
-        };
-        if (input.value === "abc" || input.value === "mermaid" || input.value === "echarts") {
-            preview.style.display = "block";
-        } else {
-            preview.style.display = "none";
-        }
+        const previewObj = genPreview(() => {
+            previewObj.previewPanel.innerHTML = `<pre style="margin: 0 !important;">${preElement.firstElementChild.innerHTML}</pre>`
+            if (input.value === "abc") {
+                abcRender(previewObj.previewPanel)
+            } else if (input.value === "mermaid") {
+                mermaidRender(previewObj.previewPanel, '.vditor-wysiwyg__preview .language-mermaid')
+            } else if (input.value === "echarts") {
+                chartRender(previewObj.previewPanel)
+            } else {
+                highlightRender(vditor.options.preview.hljs, previewObj.previewPanel)
+                codeRender(previewObj.previewPanel, vditor.options.lang)
+            }
+
+        }, preElement)
 
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertBefore);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertAfter);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", preview);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
         setPopoverPosition(vditor, preElement);
     } else {
         preElement = undefined;
@@ -368,12 +371,6 @@ export const highlightToolbar = (vditor: IVditor) => {
     // html popover
     let htmlElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
     if (htmlElement && htmlElement.getAttribute("data-type") === "html") {
-        let previewPanel: HTMLElement = htmlElement.querySelector(".vditor-wysiwyg__preview");
-        if (!previewPanel) {
-            htmlElement.insertAdjacentHTML("beforeend", '<div class="vditor-wysiwyg__preview"></div>');
-            previewPanel = htmlElement.querySelector(".vditor-wysiwyg__preview");
-        }
-        previewPanel.setAttribute("contenteditable", "false");
         const textarea = htmlElement.querySelector("textarea");
         textarea.onchange = () => {
             textarea.innerHTML = textarea.value;
@@ -381,25 +378,12 @@ export const highlightToolbar = (vditor: IVditor) => {
 
         vditor.wysiwyg.popover.innerHTML = "";
 
-        const preview = document.createElement("span");
-        if (previewPanel.style.display === "block") {
-            preview.innerHTML = editSVG;
-        } else {
-            preview.innerHTML = previewSVG;
-        }
-        preview.className = "vditor-icon";
-        preview.onclick = () => {
-            if (previewPanel.style.display === "none") {
-                preview.innerHTML = editSVG;
-                previewPanel.innerHTML = textarea.value;
-                previewPanel.style.display = "block";
-            } else {
-                preview.innerHTML = previewSVG;
-                previewPanel.style.display = "none";
+        const previewObj = genPreview(() => {
+            if (previewObj.previewPanel.style.display === "none") {
+                previewObj.previewPanel.innerHTML = textarea.value;
             }
-        };
-
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", preview);
+        }, htmlElement)
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
         setPopoverPosition(vditor, htmlElement);
     } else {
         htmlElement = undefined;
@@ -412,7 +396,7 @@ export const highlightToolbar = (vditor: IVditor) => {
 };
 
 const setPopoverPosition = (vditor: IVditor, element: HTMLElement) => {
-    vditor.wysiwyg.popover.style.top = (element.offsetTop - 25) + "px";
+    vditor.wysiwyg.popover.style.top = (element.offsetTop - 27) + "px";
     vditor.wysiwyg.popover.style.left = element.offsetLeft + "px";
     vditor.wysiwyg.popover.style.display = "block";
 };
@@ -459,3 +443,40 @@ const genClose = (popover: HTMLElement, element: HTMLElement) => {
     };
     return close;
 };
+
+const genPreview = (clickEvent: () => void, element: HTMLElement) => {
+    let previewPanel: HTMLElement = element.querySelector(".vditor-wysiwyg__preview");
+    if (!previewPanel) {
+        element.insertAdjacentHTML("beforeend", '<div class="vditor-wysiwyg__preview"></div>');
+        previewPanel = element.querySelector(".vditor-wysiwyg__preview");
+        previewPanel.setAttribute("contenteditable", "false");
+    }
+    const preview = document.createElement("span");
+    preview.innerHTML = previewSVG;
+    preview.className = "vditor-icon";
+    preview.onclick = () => {
+        if (previewPanel.style.display === "block") {
+            preview.innerHTML = previewSVG;
+            previewPanel.style.display = "none";
+            element.firstElementChild.removeAttribute('disabled');
+            element.firstElementChild.setAttribute('contenteditable', "true")
+        } else {
+            clickEvent();
+            preview.innerHTML = editSVG;
+            previewPanel.style.display = "block";
+            element.firstElementChild.setAttribute('disabled', "disabled")
+            element.firstElementChild.setAttribute('contenteditable', "false")
+        }
+    }
+
+    if (previewPanel.style.display === "block") {
+        preview.innerHTML = editSVG;
+    } else {
+        preview.innerHTML = previewSVG;
+    }
+
+    return {
+        previewPanel,
+        preview
+    }
+}
