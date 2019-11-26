@@ -5,6 +5,7 @@ import {uploadFiles} from "../upload";
 import {copyEvent, focusEvent, hotkeyEvent, scrollCenter, selectEvent} from "../util/editorCommenEvent";
 import {getText} from "../util/getText";
 import {hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
+import {afterRenderEvent} from "./afterRenderEvent";
 import {getParentBlock} from "./getParentBlock";
 import {highlightToolbar} from "./highlightToolbar";
 
@@ -76,18 +77,7 @@ class WYSIWYG {
                 return;
             }
 
-            if (vditor.options.counter > 0) {
-                vditor.counter.render(getText(vditor).length,
-                    vditor.options.counter);
-            }
-
-            if (typeof vditor.options.input === "function") {
-                vditor.options.input(getText(vditor));
-            }
-
-            if (vditor.options.cache) {
-                localStorage.setItem(`vditor${vditor.id}`, getText(vditor));
-            }
+            afterRenderEvent(vditor);
 
             // 前后空格处理
             const blockElement = getParentBlock(range.startContainer as HTMLElement);
@@ -175,10 +165,6 @@ class WYSIWYG {
                 if (vditor.hint) {
                     vditor.hint.render(vditor);
                 }
-
-                if (vditor.devtools) {
-                    vditor.devtools.renderEchart(vditor);
-                }
             }
         });
 
@@ -214,21 +200,7 @@ class WYSIWYG {
                 range.collapse(false);
                 setSelectionFocus(range);
 
-                if (vditor.options.counter > 0) {
-                    vditor.counter.render(getText(vditor).length, vditor.options.counter);
-                }
-
-                if (typeof vditor.options.input === "function") {
-                    vditor.options.input(getText(vditor));
-                }
-
-                if (vditor.options.cache) {
-                    localStorage.setItem(`vditor${vditor.id}`, getText(vditor));
-                }
-
-                if (vditor.devtools) {
-                    vditor.devtools.renderEchart(vditor);
-                }
+                afterRenderEvent(vditor);
 
                 event.preventDefault();
             }

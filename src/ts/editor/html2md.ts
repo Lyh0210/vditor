@@ -65,8 +65,7 @@ export const html2md = async (vditor: IVditor, textHTML: string, textPlain?: str
     turndownService.use(gfm);
 
     // TODO
-    // const markdownTemp = vditor.lute.Html2Md(textHTML);
-    // const markdownStr = markdownTemp[0] || markdownTemp[1];
+    // const markdownStr =  vditor.lute.HTML2Md(textHTML);
     const markdownStr = turndownService.turndown(textHTML);
 
     // process copy from IDE

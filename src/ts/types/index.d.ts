@@ -41,16 +41,16 @@ interface ILute {
     FormatMd(markdown: string): string;
 
     // debugger md
-    RenderEChartsJSON(text: string): string[];
+    RenderEChartsJSON(text: string): string;
 
     // md 转换为 html
     Md2HTML(markdown: string): string;
 
     // 粘贴时将 html 转换为 md TODO: 图片处理
-    Html2Md(html: string): string[];
+    HTML2Md(html: string): string;
 
     // wysiwyg 转换为 html
-    VditorDOM2HTML(vhtml:string):string
+    VditorDOM2HTML(vhtml: string): string;
 
     // wysiwyg 输入渲染
     SpinVditorDOM(html: string): string;

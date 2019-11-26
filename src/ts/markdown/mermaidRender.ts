@@ -1,4 +1,4 @@
-export const mermaidRender = (element: HTMLElement, className = '.language-mermaid') => {
+export const mermaidRender = (element: HTMLElement, className = ".language-mermaid") => {
     if (element.querySelectorAll(className).length === 0) {
         return;
     }

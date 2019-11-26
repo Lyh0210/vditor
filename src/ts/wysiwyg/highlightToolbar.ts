@@ -7,12 +7,12 @@ import previewSVG from "../../assets/icons/preview.svg";
 import trashcanSVG from "../../assets/icons/trashcan.svg";
 import {setSelectionFocus} from "../editor/setSelection";
 import {i18n} from "../i18n";
-import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../util/hasClosest";
-import {highlightRender} from "../markdown/highlightRender";
-import {codeRender} from "../markdown/codeRender";
 import {abcRender} from "../markdown/abcRender";
 import {chartRender} from "../markdown/chartRender";
+import {codeRender} from "../markdown/codeRender";
+import {highlightRender} from "../markdown/highlightRender";
 import {mermaidRender} from "../markdown/mermaidRender";
+import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../util/hasClosest";
 
 export const highlightToolbar = (vditor: IVditor) => {
     if (getSelection().rangeCount === 0) {
@@ -321,7 +321,7 @@ export const highlightToolbar = (vditor: IVditor) => {
     let preElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
     if (preElement && preElement.getAttribute("data-type") === "pre") {
         vditor.wysiwyg.popover.innerHTML = "";
-        let codeElement = preElement.firstElementChild.firstElementChild
+        const codeElement = preElement.firstElementChild.firstElementChild;
 
         const updateLanguage = () => {
             codeElement.className = `language-${input.value}`;
@@ -344,19 +344,20 @@ export const highlightToolbar = (vditor: IVditor) => {
         };
 
         const previewObj = genPreview(() => {
-            previewObj.previewPanel.innerHTML = `<pre style="margin: 0 !important;">${preElement.firstElementChild.innerHTML}</pre>`
+            previewObj.previewPanel.innerHTML =
+                `<pre style="margin: 0 !important;">${preElement.firstElementChild.innerHTML}</pre>`;
             if (input.value === "abc") {
-                abcRender(previewObj.previewPanel)
+                abcRender(previewObj.previewPanel);
             } else if (input.value === "mermaid") {
-                mermaidRender(previewObj.previewPanel, '.vditor-wysiwyg__preview .language-mermaid')
+                mermaidRender(previewObj.previewPanel, ".vditor-wysiwyg__preview .language-mermaid");
             } else if (input.value === "echarts") {
-                chartRender(previewObj.previewPanel)
+                chartRender(previewObj.previewPanel);
             } else {
-                highlightRender(vditor.options.preview.hljs, previewObj.previewPanel)
-                codeRender(previewObj.previewPanel, vditor.options.lang)
+                highlightRender(vditor.options.preview.hljs, previewObj.previewPanel);
+                codeRender(previewObj.previewPanel, vditor.options.lang);
             }
 
-        }, preElement)
+        }, preElement);
 
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertBefore);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertAfter);
@@ -382,7 +383,7 @@ export const highlightToolbar = (vditor: IVditor) => {
             if (previewObj.previewPanel.style.display === "none") {
                 previewObj.previewPanel.innerHTML = textarea.value;
             }
-        }, htmlElement)
+        }, htmlElement);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
         setPopoverPosition(vditor, htmlElement);
     } else {
@@ -458,16 +459,16 @@ const genPreview = (clickEvent: () => void, element: HTMLElement) => {
         if (previewPanel.style.display === "block") {
             preview.innerHTML = previewSVG;
             previewPanel.style.display = "none";
-            element.firstElementChild.removeAttribute('disabled');
-            element.firstElementChild.setAttribute('contenteditable', "true")
+            element.firstElementChild.removeAttribute("disabled");
+            element.firstElementChild.setAttribute("contenteditable", "true");
         } else {
             clickEvent();
             preview.innerHTML = editSVG;
             previewPanel.style.display = "block";
-            element.firstElementChild.setAttribute('disabled', "disabled")
-            element.firstElementChild.setAttribute('contenteditable', "false")
+            element.firstElementChild.setAttribute("disabled", "disabled");
+            element.firstElementChild.setAttribute("contenteditable", "false");
         }
-    }
+    };
 
     if (previewPanel.style.display === "block") {
         preview.innerHTML = editSVG;
@@ -476,7 +477,7 @@ const genPreview = (clickEvent: () => void, element: HTMLElement) => {
     }
 
     return {
+        preview,
         previewPanel,
-        preview
-    }
-}
+    };
+};
