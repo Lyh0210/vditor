@@ -3,7 +3,7 @@ import {setSelectionFocus} from "../editor/setSelection";
 export const setRangeByWbr = (element: HTMLElement, range: Range) => {
     const wbrElement = element.querySelector("wbr");
     if (!wbrElement) {
-        return
+        return;
     }
     if (!wbrElement.previousElementSibling) {
         if (wbrElement.previousSibling) {
@@ -30,4 +30,4 @@ export const setRangeByWbr = (element: HTMLElement, range: Range) => {
         }
     }
     setSelectionFocus(range);
-}
+};

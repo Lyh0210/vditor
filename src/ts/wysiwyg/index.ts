@@ -4,11 +4,11 @@ import {setSelectionFocus} from "../editor/setSelection";
 import {uploadFiles} from "../upload";
 import {copyEvent, focusEvent, hotkeyEvent, scrollCenter, selectEvent} from "../util/editorCommenEvent";
 import {hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
+import {processPasteCode} from "../util/processPasteCode";
 import {afterRenderEvent} from "./afterRenderEvent";
 import {getParentBlock} from "./getParentBlock";
 import {highlightToolbar} from "./highlightToolbar";
 import {setRangeByWbr} from "./setRangeByWbr";
-import {processPasteCode} from "../util/processPasteCode";
 
 class WYSIWYG {
     public element: HTMLPreElement;
@@ -63,28 +63,28 @@ class WYSIWYG {
             if (doc.body) {
                 textHTML = doc.body.innerHTML;
             }
-            const code = processPasteCode(textHTML, textPlain, 'wysiwyg')
+            const code = processPasteCode(textHTML, textPlain, "wysiwyg");
             if (code) {
-                const codeNode = document.createElement('div')
-                codeNode.innerHTML = '<pre><code></code></pre>'
-                codeNode.querySelector('code').innerText = code
-                const range = getSelection().getRangeAt(0)
-                range.insertNode(codeNode.firstElementChild)
-                range.collapse(false)
-                return
+                const codeNode = document.createElement("div");
+                codeNode.innerHTML = "<pre><code></code></pre>";
+                codeNode.querySelector("code").innerText = code;
+                const range = getSelection().getRangeAt(0);
+                range.insertNode(codeNode.firstElementChild);
+                range.collapse(false);
+                return;
             }
 
             if (textHTML.trim() !== "") {
-                console.log(`HTML2VditorDOM-argument[${textHTML}]`)
+                console.log(`HTML2VditorDOM-argument[${textHTML}]`);
                 document.execCommand("insertHTML", false, vditor.lute.HTML2VditorDOM(textHTML));
-                console.log(`HTML2VditorDOM-result[${vditor.lute.HTML2VditorDOM(textHTML)}]`)
+                console.log(`HTML2VditorDOM-result[${vditor.lute.HTML2VditorDOM(textHTML)}]`);
             } else if (event.clipboardData.files.length > 0 && vditor.options.upload.url) {
                 uploadFiles(vditor, event.clipboardData.files);
             } else if (textPlain.trim() !== "" && event.clipboardData.files.length === 0) {
-                const textNode = document.createTextNode(textPlain)
-                const range = getSelection().getRangeAt(0)
-                range.insertNode(textNode)
-                range.collapse(false)
+                const textNode = document.createTextNode(textPlain);
+                const range = getSelection().getRangeAt(0);
+                range.insertNode(textNode);
+                range.collapse(false);
             }
         });
 
@@ -157,7 +157,7 @@ class WYSIWYG {
                 this.element.insertAdjacentElement("beforeend", this.popover);
 
                 // 设置光标
-                setRangeByWbr(this.element, range)
+                setRangeByWbr(this.element, range);
 
                 if (vditor.hint) {
                     vditor.hint.render(vditor);
@@ -188,7 +188,7 @@ class WYSIWYG {
 
         this.element.addEventListener("keypress", (event: KeyboardEvent) => {
             if (event.key !== "Enter") {
-                return
+                return;
             }
             if (!event.metaKey && !event.ctrlKey && event.shiftKey) {
                 // 软换行

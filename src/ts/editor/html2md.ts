@@ -1,7 +1,7 @@
+import {processPasteCode} from "../util/processPasteCode";
 import {insertText} from "./insertText";
 import {setSelectionByInlineText} from "./setSelection";
 import {gfm} from "./turndown-plugin-gfm";
-import {processPasteCode} from "../util/processPasteCode";
 
 export const html2md = async (vditor: IVditor, textHTML: string, textPlain?: string) => {
     // process word
@@ -11,10 +11,10 @@ export const html2md = async (vditor: IVditor, textHTML: string, textPlain?: str
     }
 
     // process copy from IDE
-    const code = processPasteCode(textHTML, textPlain)
+    const code = processPasteCode(textHTML, textPlain);
 
     if (code) {
-        return code
+        return code;
     }
 
     const {default: TurndownService} = await import(/* webpackChunkName: "turndown" */ "turndown");

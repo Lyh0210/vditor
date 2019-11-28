@@ -1,4 +1,4 @@
-export const processPasteCode = (html: string, text: string, type: string = 'markdown') => {
+export const processPasteCode = (html: string, text: string, type: string = "markdown") => {
     const tempElement = document.createElement("div");
     tempElement.innerHTML = html;
     let isCode = false;
@@ -19,14 +19,14 @@ export const processPasteCode = (html: string, text: string, type: string = 'mar
 
     if (isCode) {
         const code = text || html;
-        if (type === 'wysiwyg') {
-            return `${code}`
+        if (type === "wysiwyg") {
+            return `${code}`;
         }
         if (/\n/.test(code)) {
             return "```\n" + code + "\n```";
         } else {
-            return `\`${code}\``
+            return `\`${code}\``;
         }
     }
-    return false
-}
+    return false;
+};

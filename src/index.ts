@@ -26,13 +26,13 @@ import {Tip} from "./ts/tip";
 import {Toolbar} from "./ts/toolbar/index";
 import {Ui} from "./ts/ui/index";
 import {Undo} from "./ts/undo";
+import {WysiwygUndo} from "./ts/undo/WysiwygUndo";
 import {Upload} from "./ts/upload/index";
 import {getText} from "./ts/util/getText";
 import {Options} from "./ts/util/Options";
 import {setPreviewMode} from "./ts/util/setPreviewMode";
 import {WYSIWYG} from "./ts/wysiwyg";
 import {renderDomByMd} from "./ts/wysiwyg/renderDomByMd";
-import {WysiwygUndo} from "./ts/undo/WysiwygUndo";
 
 class Vditor {
 
@@ -83,8 +83,6 @@ class Vditor {
             this.vditor.editor = new Editor(this.vditor);
             this.vditor.undo = new Undo();
         }
-
-
 
         if (mergedOptions.resize.enable) {
             const resize = new Resize(this.vditor);

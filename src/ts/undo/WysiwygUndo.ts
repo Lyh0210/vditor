@@ -1,11 +1,11 @@
 import DiffMatchPatch, {diff_match_patch, patch_obj} from "diff-match-patch";
 import {scrollCenter} from "../util/editorCommenEvent";
-import {setRangeByWbr} from "../wysiwyg/setRangeByWbr";
 import {afterRenderEvent} from "../wysiwyg/afterRenderEvent";
+import {setRangeByWbr} from "../wysiwyg/setRangeByWbr";
 
 class WysiwygUndo {
-    private undoStack: Array<patch_obj[]>;
-    private redoStack: Array<patch_obj[]>;
+    private undoStack: patch_obj[][];
+    private redoStack: patch_obj[][];
     private stackSize = 50;
     private dmp: diff_match_patch;
     private lastText: string;
@@ -85,15 +85,13 @@ class WysiwygUndo {
             text = this.dmp.patch_apply(redoPatchList, this.lastText)[0];
         } else {
             text = this.dmp.patch_apply(state, this.lastText)[0];
-            if (this.undoStack[this.undoStack.length - 1]) {
-            }
         }
 
         this.lastText = text;
 
         vditor.wysiwyg.element.innerHTML = text;
         vditor.wysiwyg.element.insertAdjacentElement("beforeend", vditor.wysiwyg.popover);
-        setRangeByWbr(vditor.wysiwyg.element, vditor.wysiwyg.element.ownerDocument.createRange())
+        setRangeByWbr(vditor.wysiwyg.element, vditor.wysiwyg.element.ownerDocument.createRange());
         scrollCenter(vditor.wysiwyg.element);
         afterRenderEvent(vditor);
 
