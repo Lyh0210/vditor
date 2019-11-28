@@ -13,6 +13,7 @@ import {codeRender} from "../markdown/codeRender";
 import {highlightRender} from "../markdown/highlightRender";
 import {mermaidRender} from "../markdown/mermaidRender";
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../util/hasClosest";
+import {mathRenderByLute} from "../markdown/mathRenderByLute";
 
 export const highlightToolbar = (vditor: IVditor) => {
     if (getSelection().rangeCount === 0) {
@@ -116,6 +117,21 @@ export const highlightToolbar = (vditor: IVditor) => {
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", indent);
 
         setPopoverPosition(vditor, topUlElement);
+    }
+
+    // quote popover
+    let blockquoteElement = hasClosestByTag(typeElement, "BLOCKQUOTE") as HTMLTableElement;
+    if (blockquoteElement && !(topUlElement && blockquoteElement.contains(topUlElement))) {
+        vditor.wysiwyg.popover.innerHTML = "";
+        const insertBefore = genInsertBefore(range, blockquoteElement);
+        const insertAfter = genInsertAfter(range, blockquoteElement);
+        const close = genClose(vditor.wysiwyg.popover, blockquoteElement);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertBefore);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertAfter);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
+        setPopoverPosition(vditor, blockquoteElement);
+    } else {
+        blockquoteElement = undefined
     }
 
     // table popover
@@ -317,9 +333,11 @@ export const highlightToolbar = (vditor: IVditor) => {
         setPopoverPosition(vditor, imgElement);
     }
 
+    const blockElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block")
     // pre popover
-    let preElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
-    if (preElement && preElement.getAttribute("data-type") === "pre") {
+    let preElement: HTMLElement
+    if (blockElement && blockElement.getAttribute("data-type") === "pre") {
+        preElement = blockElement
         vditor.wysiwyg.popover.innerHTML = "";
         const codeElement = preElement.firstElementChild.firstElementChild;
 
@@ -335,7 +353,7 @@ export const highlightToolbar = (vditor: IVditor) => {
         input.className = "vditor-input";
         input.setAttribute("placeholder", "language");
         input.value = codeElement.className.indexOf("language-") > -1 ?
-                codeElement.className.split("-")[1].split(" ")[0] : "";
+            codeElement.className.split("-")[1].split(" ")[0] : "";
         input.onblur = updateLanguage;
         input.onkeypress = (event) => {
             if (event.key === "Enter") {
@@ -365,13 +383,12 @@ export const highlightToolbar = (vditor: IVditor) => {
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
         setPopoverPosition(vditor, preElement);
-    } else {
-        preElement = undefined;
     }
 
     // html popover
-    let htmlElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
-    if (htmlElement && htmlElement.getAttribute("data-type") === "html") {
+    let htmlElement: HTMLElement
+    if (blockElement && blockElement.getAttribute("data-type") === "html") {
+        htmlElement = blockElement
         const textarea = htmlElement.querySelector("textarea");
         textarea.onchange = () => {
             textarea.innerHTML = textarea.value;
@@ -380,18 +397,29 @@ export const highlightToolbar = (vditor: IVditor) => {
         vditor.wysiwyg.popover.innerHTML = "";
 
         const previewObj = genPreview(() => {
-            if (previewObj.previewPanel.style.display === "none") {
-                previewObj.previewPanel.innerHTML = textarea.value;
-            }
+            previewObj.previewPanel.innerHTML = textarea.value;
         }, htmlElement);
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
         setPopoverPosition(vditor, htmlElement);
-    } else {
-        htmlElement = undefined;
     }
 
-    if (!imgElement && !topUlElement && !tableElement && !preElement && typeElement.nodeName !== "A" && !htmlElement
-        && !hasClosestByClassName(typeElement, "vditor-panel")) {
+    // math popover
+    let mathElement: HTMLElement
+    if (blockElement && (blockElement.getAttribute("data-type") === "math-block" ||
+        blockElement.getAttribute("data-type") === "math-inline")) {
+        mathElement = blockElement
+        vditor.wysiwyg.popover.innerHTML = "";
+
+        const previewObj = genPreview(() => {
+            previewObj.previewPanel.innerHTML = `<div class="vditor-math">${mathElement.innerHTML}</div>`
+            mathRenderByLute(previewObj.previewPanel)
+        }, mathElement);
+        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
+        setPopoverPosition(vditor, mathElement);
+    }
+
+    if (!mathElement && !blockquoteElement && !imgElement && !topUlElement && !tableElement && !preElement && !htmlElement
+        && typeElement.nodeName !== "A" && !hasClosestByClassName(typeElement, "vditor-panel")) {
         vditor.wysiwyg.popover.style.display = "none";
     }
 };

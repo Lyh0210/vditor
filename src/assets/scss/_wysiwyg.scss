@@ -27,7 +27,8 @@
         margin-bottom: 1em !important;
       }
 
-      textarea {
+      textarea,
+      &[data-type="math-block"]{
         border: 0;
         background-color: rgba($toolbarIconHover, .16);
         border-radius: 3px;
