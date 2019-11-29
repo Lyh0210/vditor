@@ -372,7 +372,7 @@ export const highlightToolbar = (vditor: IVditor) => {
         const previewObj = genPreview(() => {
             if (blockType === 'code-block') {
                 previewObj.previewPanel.innerHTML =
-                    `<pre style="margin: 0 !important;">${blockElement.firstElementChild.innerHTML}</pre>`;
+                    `<pre>${blockElement.firstElementChild.innerHTML}</pre>`;
                 if (language.value === "abc") {
                     abcRender(previewObj.previewPanel);
                 } else if (language.value === "mermaid") {
