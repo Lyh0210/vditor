@@ -22,36 +22,13 @@
     }
 
     &__block {
-      position: relative;
       pre {
         margin-bottom: 1em !important;
-      }
-
-      textarea,
-      &[data-type="math-block"]{
-        border: 0;
-        background-color: rgba($toolbarIconHover, .16);
-        border-radius: 3px;
-        resize: vertical;
-        min-height: 72px;
-        width: 100%;
-        box-sizing: border-box;
-
-        &:focus {
-          outline: none;
-        }
       }
     }
 
     &__preview {
-      background-color: $textareaFocusBg;
       display: none;
-      position: absolute;
-      top: 0;
-      width: 100%;
-      border-radius: 3px;
-      box-sizing: border-box;
-      box-shadow: $layerShadow;
     }
   }
 }

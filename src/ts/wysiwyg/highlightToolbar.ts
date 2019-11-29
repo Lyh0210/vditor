@@ -11,9 +11,9 @@ import {abcRender} from "../markdown/abcRender";
 import {chartRender} from "../markdown/chartRender";
 import {codeRender} from "../markdown/codeRender";
 import {highlightRender} from "../markdown/highlightRender";
+import {mathRenderByLute} from "../markdown/mathRenderByLute";
 import {mermaidRender} from "../markdown/mermaidRender";
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../util/hasClosest";
-import {mathRenderByLute} from "../markdown/mathRenderByLute";
 
 export const highlightToolbar = (vditor: IVditor) => {
     if (getSelection().rangeCount === 0) {
@@ -26,7 +26,8 @@ export const highlightToolbar = (vditor: IVditor) => {
     }
 
     let toolbarName = typeElement.nodeName;
-    if (toolbarName === "CODE" && typeElement.parentElement.nodeName === "PRE") {
+    if (toolbarName === "CODE" &&
+        (typeElement.parentElement.nodeName === "PRE" || typeElement.getAttribute('data-type'))) {
         toolbarName = "";
     }
     if (/^H[1-6]$/.test(toolbarName)) {
@@ -131,7 +132,7 @@ export const highlightToolbar = (vditor: IVditor) => {
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
         setPopoverPosition(vditor, blockquoteElement);
     } else {
-        blockquoteElement = undefined
+        blockquoteElement = undefined;
     }
 
     // table popover
@@ -333,92 +334,68 @@ export const highlightToolbar = (vditor: IVditor) => {
         setPopoverPosition(vditor, imgElement);
     }
 
-    const blockElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block")
-    // pre popover
-    let preElement: HTMLElement
-    if (blockElement && blockElement.getAttribute("data-type") === "pre") {
-        preElement = blockElement
+    const blockElement = hasClosestByClassName(typeElement, "vditor-wysiwyg__block");
+    // block popover: math-inline, math-block, html-block, html-inline, code-block
+    if (blockElement) {
+        const blockType = blockElement.getAttribute("data-type")
         vditor.wysiwyg.popover.innerHTML = "";
-        const codeElement = preElement.firstElementChild.firstElementChild;
 
-        const updateLanguage = () => {
-            codeElement.className = `language-${input.value}`;
-        };
+        const language = document.createElement("input");
+        if (blockType.indexOf('block') > -1) {
+            const insertBefore = genInsertBefore(range, blockElement);
+            const insertAfter = genInsertAfter(range, blockElement);
+            const close = genClose(vditor.wysiwyg.popover, blockElement);
+            vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertBefore);
+            vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertAfter);
+            vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
 
-        const insertBefore = genInsertBefore(range, preElement);
-        const insertAfter = genInsertAfter(range, preElement);
-        const close = genClose(vditor.wysiwyg.popover, preElement);
+            if (blockType === 'code-block') {
+                const codeElement = blockElement.firstElementChild.firstElementChild;
 
-        const input = document.createElement("input");
-        input.className = "vditor-input";
-        input.setAttribute("placeholder", "language");
-        input.value = codeElement.className.indexOf("language-") > -1 ?
-            codeElement.className.split("-")[1].split(" ")[0] : "";
-        input.onblur = updateLanguage;
-        input.onkeypress = (event) => {
-            if (event.key === "Enter") {
-                updateLanguage();
+                const updateLanguage = () => {
+                    codeElement.className = `language-${language.value}`;
+                };
+                language.className = "vditor-input";
+                language.setAttribute("placeholder", "language");
+                language.value = codeElement.className.indexOf("language-") > -1 ?
+                    codeElement.className.split("-")[1].split(" ")[0] : "";
+                language.onblur = updateLanguage;
+                language.onkeypress = (event) => {
+                    if (event.key === "Enter") {
+                        updateLanguage();
+                    }
+                };
+                vditor.wysiwyg.popover.insertAdjacentElement("beforeend", language);
             }
-        };
+        }
 
         const previewObj = genPreview(() => {
-            previewObj.previewPanel.innerHTML =
-                `<pre style="margin: 0 !important;">${preElement.firstElementChild.innerHTML}</pre>`;
-            if (input.value === "abc") {
-                abcRender(previewObj.previewPanel);
-            } else if (input.value === "mermaid") {
-                mermaidRender(previewObj.previewPanel, ".vditor-wysiwyg__preview .language-mermaid");
-            } else if (input.value === "echarts") {
-                chartRender(previewObj.previewPanel);
-            } else {
-                highlightRender(vditor.options.preview.hljs, previewObj.previewPanel);
-                codeRender(previewObj.previewPanel, vditor.options.lang);
+            if (blockType === 'code-block') {
+                previewObj.previewPanel.innerHTML =
+                    `<pre style="margin: 0 !important;">${blockElement.firstElementChild.innerHTML}</pre>`;
+                if (language.value === "abc") {
+                    abcRender(previewObj.previewPanel);
+                } else if (language.value === "mermaid") {
+                    mermaidRender(previewObj.previewPanel, ".vditor-wysiwyg__preview .language-mermaid");
+                } else if (language.value === "echarts") {
+                    chartRender(previewObj.previewPanel);
+                } else {
+                    highlightRender(vditor.options.preview.hljs, previewObj.previewPanel);
+                    codeRender(previewObj.previewPanel, vditor.options.lang);
+                }
+            } else if (blockType.indexOf('html') > -1) {
+                previewObj.previewPanel.innerHTML = blockElement.firstElementChild.innerHTML
+            } else if (blockType.indexOf('math') > -1) {
+                const tagName = blockType === "math-block" ? 'div' : 'span'
+                previewObj.previewPanel.innerHTML = `<${tagName} class="vditor-math">${blockElement.firstChild.textContent}</${tagName}>`;
+                mathRenderByLute(previewObj.previewPanel);
             }
-
-        }, preElement);
-
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertBefore);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", insertAfter);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", close);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", input);
+        }, blockElement, blockType.indexOf('block') > -1 ? 'div' : 'span');
         vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
-        setPopoverPosition(vditor, preElement);
+        setPopoverPosition(vditor, blockElement);
     }
 
-    // html popover
-    let htmlElement: HTMLElement
-    if (blockElement && blockElement.getAttribute("data-type") === "html") {
-        htmlElement = blockElement
-        const textarea = htmlElement.querySelector("textarea");
-        textarea.onchange = () => {
-            textarea.innerHTML = textarea.value;
-        };
-
-        vditor.wysiwyg.popover.innerHTML = "";
-
-        const previewObj = genPreview(() => {
-            previewObj.previewPanel.innerHTML = textarea.value;
-        }, htmlElement);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
-        setPopoverPosition(vditor, htmlElement);
-    }
-
-    // math popover
-    let mathElement: HTMLElement
-    if (blockElement && (blockElement.getAttribute("data-type") === "math-block" ||
-        blockElement.getAttribute("data-type") === "math-inline")) {
-        mathElement = blockElement
-        vditor.wysiwyg.popover.innerHTML = "";
-
-        const previewObj = genPreview(() => {
-            previewObj.previewPanel.innerHTML = `<div class="vditor-math">${mathElement.innerHTML}</div>`
-            mathRenderByLute(previewObj.previewPanel)
-        }, mathElement);
-        vditor.wysiwyg.popover.insertAdjacentElement("beforeend", previewObj.preview);
-        setPopoverPosition(vditor, mathElement);
-    }
-
-    if (!mathElement && !blockquoteElement && !imgElement && !topUlElement && !tableElement && !preElement && !htmlElement
+    if (!blockquoteElement && !imgElement && !topUlElement && !tableElement && !blockElement
         && typeElement.nodeName !== "A" && !hasClosestByClassName(typeElement, "vditor-panel")) {
         vditor.wysiwyg.popover.style.display = "none";
     }
@@ -473,10 +450,10 @@ const genClose = (popover: HTMLElement, element: HTMLElement) => {
     return close;
 };
 
-const genPreview = (clickEvent: () => void, element: HTMLElement) => {
+const genPreview = (clickEvent: () => void, element: HTMLElement, tagName: string) => {
     let previewPanel: HTMLElement = element.querySelector(".vditor-wysiwyg__preview");
     if (!previewPanel) {
-        element.insertAdjacentHTML("beforeend", '<div class="vditor-wysiwyg__preview"></div>');
+        element.insertAdjacentHTML("beforeend", `<${tagName} class="vditor-wysiwyg__preview"></${tagName}>`);
         previewPanel = element.querySelector(".vditor-wysiwyg__preview");
         previewPanel.setAttribute("contenteditable", "false");
         previewPanel.setAttribute("data-render", "false");
@@ -485,17 +462,20 @@ const genPreview = (clickEvent: () => void, element: HTMLElement) => {
     preview.innerHTML = previewSVG;
     preview.className = "vditor-icon";
     preview.onclick = () => {
-        if (previewPanel.style.display === "block") {
+        let display = 'block'
+        if (tagName === 'span') {
+            display = 'inline'
+        }
+
+        if (previewPanel.style.display === "block" || previewPanel.style.display === "inline") {
             preview.innerHTML = previewSVG;
             previewPanel.style.display = "none";
-            element.firstElementChild.removeAttribute("disabled");
-            element.firstElementChild.setAttribute("contenteditable", "true");
+            element.firstElementChild.setAttribute('style', `display: ${display}`)
         } else {
-            clickEvent();
             preview.innerHTML = editSVG;
-            previewPanel.style.display = "block";
-            element.firstElementChild.setAttribute("disabled", "disabled");
-            element.firstElementChild.setAttribute("contenteditable", "false");
+            previewPanel.style.display = display;
+            element.firstElementChild.setAttribute('style', 'display: none')
+            clickEvent();
         }
     };
 
